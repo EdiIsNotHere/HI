@@ -2,81 +2,20 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Account Verification</title>
+  <title>Hahahahaa</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body {
-      background: #0f172a;
-      color: #e5e7eb;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-    }
 
-    .card {
-      background: #020617;
-      padding: 30px;
-      border-radius: 12px;
-      width: 100%;
-      max-width: 380px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    }
-
-    h1 {
-      font-size: 20px;
-      margin-bottom: 10px;
-    }
-
-    p {
-      font-size: 14px;
-      color: #9ca3af;
-      margin-bottom: 20px;
-    }
-
-    input {
-      width: 100%;
-      padding: 12px;
-      border-radius: 8px;
-      border: none;
-      margin-bottom: 15px;
-      font-size: 15px;
-    }
-
-    button {
-      width: 100%;
-      padding: 12px;
-      background: #2563eb;
-      border: none;
-      border-radius: 8px;
-      color: white;
-      font-size: 15px;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background: #1d4ed8;
-    }
-
-    .result {
-      margin-top: 20px;
-      font-size: 18px;
-      text-align: center;
-    }
-  </style>
+  <!-- jQuery (required for $.getJSON) -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
 
   <div class="card">
-    <h1>Account Verification</h1>
-    <p>Please confirm your email to continue.</p>
-
     <input type="email" id="email" placeholder="name@example.com">
-    <button onclick="showName()">Continue</button>
+    <button onclick="showName(); getIP();">Continue</button>
 
     <div class="result" id="result"></div>
+    <div class="ip" id="ip"></div>
   </div>
 
   <script>
@@ -86,6 +25,12 @@
 
       const name = email.split("@")[0];
       document.getElementById("result").textContent = name + " ?";
+    }
+
+    function getIP() {
+      $.getJSON("https://api.ipify.org?format=json", function (data) {
+        document.getElementById("ip").textContent = "Your IP: " + data.ip;
+      });
     }
   </script>
 
