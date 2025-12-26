@@ -5,17 +5,17 @@
   <title>Hahahahaa</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- jQuery (required for $.getJSON) -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
 
   <div class="card">
     <input type="email" id="email" placeholder="name@example.com">
-    <button onclick="showName(); getIP();">Continue</button>
+    <button onclick="showName(); getIP(); lookupName();">Continue</button>
 
     <div class="result" id="result"></div>
     <div class="ip" id="ip"></div>
+    <div class="realname" id="realname"></div>
   </div>
 
   <script>
@@ -28,9 +28,27 @@
     }
 
     function getIP() {
-      $.getJSON("https://api.ipify.org?format=json", function (data) {
+      $.getJSON("https://api.ipify.org?format=json", function(data) {
         document.getElementById("ip").textContent = "Your IP: " + data.ip;
       });
+    }
+
+    async function lookupName() {
+      const email = document.getElementById("email").value;
+      if (!email) return;
+
+      try {
+        const response = await fetch(`/lookup?email=${encodeURIComponent(email)}`);
+        const data = await response.json();
+
+        if (data.name) {
+          document.getElementById("realname").textContent = "Real Name: " + data.name;
+        } else {
+          document.getElementById("realname").textContent = "Real Name: Not found";
+        }
+      } catch (err) {
+        document.getElementById("realname").textContent = "Error fetching name";
+      }
     }
   </script>
 
