@@ -6,6 +6,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    .card { max-width: 400px; margin: auto; padding: 20px; border: 1px solid #ccc; border-radius: 10px; }
+    input, button { width: 100%; padding: 10px; margin: 5px 0; }
+    #result, #ip, #realname { margin-top: 10px; font-weight: bold; }
+  </style>
 </head>
 <body>
 
@@ -13,42 +19,40 @@
     <input type="email" id="email" placeholder="name@example.com">
     <button onclick="showName(); getIP(); lookupName();">Continue</button>
 
-    <div class="result" id="result"></div>
-    <div class="ip" id="ip"></div>
-    <div class="realname" id="realname"></div>
+    <div id="result"></div>
+    <div id="ip"></div>
+    <div id="realname"></div>
   </div>
 
   <script>
+    // Show the email prefix as a simple guess
     function showName() {
       const email = document.getElementById("email").value;
       if (!email.includes("@")) return;
-
       const name = email.split("@")[0];
       document.getElementById("result").textContent = name + " ?";
     }
 
+    // Show public IP
     function getIP() {
       $.getJSON("https://api.ipify.org?format=json", function(data) {
         document.getElementById("ip").textContent = "Your IP: " + data.ip;
       });
     }
 
-    async function lookupName() {
+    // Guess a more readable name from the email
+    function guessNameFromEmail(email) {
+      const local = email.split("@")[0];
+      const clean = local.replace(/\d+/g, ""); // remove numbers
+      const parts = clean.split(/[\._\-]/).filter(Boolean); // split on dots, underscores, hyphens
+      return parts.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(" ");
+    }
+
+    function lookupName() {
       const email = document.getElementById("email").value;
-      if (!email) return;
-
-      try {
-        const response = await fetch(`/lookup?email=${encodeURIComponent(email)}`);
-        const data = await response.json();
-
-        if (data.name) {
-          document.getElementById("realname").textContent = "Real Name: " + data.name;
-        } else {
-          document.getElementById("realname").textContent = "Real Name: Not found";
-        }
-      } catch (err) {
-        document.getElementById("realname").textContent = "Error fetching name";
-      }
+      if (!email.includes("@")) return;
+      const guessedName = guessNameFromEmail(email);
+      document.getElementById("realname").textContent = "Guessed Name: " + guessedName;
     }
   </script>
 
