@@ -1,27 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Hahahahaa</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     body { font-family: Arial, sans-serif; padding: 20px; }
-    .card { max-width: 400px; margin: auto; padding: 20px; border: 1px solid #ccc; border-radius: 10px; }
-    input, button { width: 100%; padding: 10px; margin: 5px 0; }
-    #result, #ip, #realname { margin-top: 10px; font-weight: bold; }
+    .card {
+      max-width: 400px;
+      margin: auto;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+    }
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin: 5px 0;
+      box-sizing: border-box;
+    }
+    #result, #ip, #realname, #savedData {
+      margin-top: 10px;
+      font-weight: bold;
+      white-space: pre-wrap;
+      max-height: 200px;
+      overflow-y: auto;
+      border: 1px solid #ddd;
+      padding: 10px;
+      border-radius: 5px;
+      background: #f9f9f9;
+    }
   </style>
 </head>
 <body>
 
-<div class="card">
-  <input type="email" id="email" placeholder="name@example.com">
-  <button onclick="process()">Continue</button>
+  <div class="card">
+    <input type="email" id="email" placeholder="name@example.com" />
+    <button onclick="process()">Continue</button>
+    <button onclick="showSaved()">Show Saved Data</button>
+    <button onclick="clearSaved()">Clear Saved Data</button>
 
-  <div id="result"></div>
-  <div id="ip"></div>
-  <div id="realname"></div>
-</div>
+    <div id="result"></div>
+    <div id="ip"></div>
+    <div id="realname"></div>
+    <div id="savedData"></div>
+  </div>
 
 <script>
 function guessNameFromEmail(email) {
@@ -32,27 +55,55 @@ function guessNameFromEmail(email) {
 }
 
 async function process() {
-  const email = document.getElementById("email").value;
-  if (!email.includes("@")) return;
+  const email = document.getElementById("email").value.trim();
+  if (!email.includes("@")) {
+    alert("Please enter a valid email.");
+    return;
+  }
 
   const guessedName = guessNameFromEmail(email);
 
   document.getElementById("result").textContent = email.split("@")[0] + " ?";
   document.getElementById("realname").textContent = "Guessed Name: " + guessedName;
 
-  const ipData = await fetch("https://api.ipify.org?format=json").then(r => r.json());
-  document.getElementById("ip").textContent = "Your IP: " + ipData.ip;
+  try {
+    const ipData = await fetch("https://api.ipify.org?format=json").then(r => r.json());
+    document.getElementById("ip").textContent = "Your IP: " + ipData.ip;
 
-  let saved = JSON.parse(localStorage.getItem("savedUsers")) || [];
+    let saved = JSON.parse(localStorage.getItem("savedUsers")) || [];
 
-  saved.push({
-    email,
-    guessedName,
-    ip: ipData.ip,
-    time: new Date().toISOString()
-  });
+    saved.push({
+      email,
+      guessedName,
+      ip: ipData.ip,
+      time: new Date().toISOString()
+    });
 
-  localStorage.setItem("savedUsers", JSON.stringify(saved));
+    localStorage.setItem("savedUsers", JSON.stringify(saved));
+    document.getElementById("result").textContent += " — Saved locally!";
+  } catch (e) {
+    alert("Failed to fetch IP address. Try again.");
+  }
+}
+
+function showSaved() {
+  const saved = JSON.parse(localStorage.getItem("savedUsers")) || [];
+  if (saved.length === 0) {
+    document.getElementById("savedData").textContent = "No data saved yet.";
+    return;
+  }
+  const display = saved.map((entry, i) =>
+    `${i+1}. Email: ${entry.email}\n   Name: ${entry.guessedName}\n   IP: ${entry.ip}\n   Time: ${entry.time}\n`
+  ).join("\n");
+  document.getElementById("savedData").textContent = display;
+}
+
+function clearSaved() {
+  if (confirm("Are you sure you want to clear all saved data?")) {
+    localStorage.removeItem("savedUsers");
+    document.getElementById("savedData").textContent = "";
+    alert("Saved data cleared.");
+  }
 }
 </script>
 
