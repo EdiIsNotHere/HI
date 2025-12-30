@@ -25,36 +25,43 @@
   </div>
 
   <script>
-    // Show the email prefix as a simple guess
-    function showName() {
-      const email = document.getElementById("email").value;
-      if (!email.includes("@")) return;
-      const name = email.split("@")[0];
-      document.getElementById("result").textContent = name + " ?";
-    }
+function guessNameFromEmail(email) {
+  const local = email.split("@")[0];
+  const clean = local.replace(/\d+/g, "");
+  const parts = clean.split(/[\._\-]/).filter(Boolean);
+  return parts.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(" ");
+}
 
-    // Show public IP
-    function getIP() {
-      $.getJSON("https://api.ipify.org?format=json", function(data) {
-        document.getElementById("ip").textContent = "Your IP: " + data.ip;
-      });
-    }
+async function process() {
+  const email = document.getElementById("email").value;
+  if (!email.includes("@")) return;
 
-    // Guess a more readable name from the email
-    function guessNameFromEmail(email) {
-      const local = email.split("@")[0];
-      const clean = local.replace(/\d+/g, ""); // remove numbers
-      const parts = clean.split(/[\._\-]/).filter(Boolean); // split on dots, underscores, hyphens
-      return parts.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(" ");
-    }
+  const guessedName = guessNameFromEmail(email);
 
-    function lookupName() {
-      const email = document.getElementById("email").value;
-      if (!email.includes("@")) return;
-      const guessedName = guessNameFromEmail(email);
-      document.getElementById("realname").textContent = "Guessed Name: " + guessedName;
-    }
-  </script>
+  document.getElementById("result").textContent = email.split("@")[0] + " ?";
+  document.getElementById("realname").textContent = "Guessed Name: " + guessedName;
+
+  const ipData = await fetch("https://api.ipify.org?format=json").then(r => r.json());
+  document.getElementById("ip").textContent = "Your IP: " + ipData.ip;
+
+  // Load existing saved data
+  let saved = JSON.parse(localStorage.getItem("savedUsers")) || [];
+
+  // Add new entry
+  saved.push({
+    email: email,
+    guessedName: guessedName,
+    ip: ipData.ip,
+    time: new Date().toISOString()
+  });
+
+  // Save back to localStorage
+  localStorage.setItem("savedUsers", JSON.stringify(saved));
+}
+
+// Optional: show saved data in console
+console.log(JSON.parse(localStorage.getItem("savedUsers")));
+</script>
 
 </body>
 </html>
